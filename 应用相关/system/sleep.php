@@ -29,7 +29,8 @@ while(true){
 		#让设备有时间画出来
 		sleep(1);
 		file_put_contents("/sys/android_power/state","standby");
-		sleep(5);
+		#唤醒以后立即刷新一次应用
+		system ( "/bin/sh /mnt/udisk/system/key.sh 28" );
 	}else{
 		sleep(5);
 	}	
