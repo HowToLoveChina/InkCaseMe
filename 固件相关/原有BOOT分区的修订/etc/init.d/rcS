@@ -66,13 +66,9 @@ fi
 
 #一次性更新脚本处理
 if [ -f /mnt/udisk/update.sh ]; then
-  sh /mnt/udisk/update.sh
   mv /mnt/udisk/update.sh  /mnt/udisk/_update.sh
+  sh /mnt/udisk/_update.sh
   reboot
-else
-  if [ -f /opt/etc/rc.local ]; then
-    /opt/etc/rc.local &
-  fi
 fi
 
 #优先执行用户的启动脚本

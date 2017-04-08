@@ -28,7 +28,6 @@ while(true){
 		draw_bitmap($Zz,10,587);
 		#让设备有时间画出来
 		sleep(1);
-		dev_sleep
 		file_put_contents("/sys/android_power/state","standby");
 		sleep(5);
 	}else{
