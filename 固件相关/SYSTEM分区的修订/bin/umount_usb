@@ -1,0 +1,6 @@
+
+#!/bin/sh
+
+umount /mnt/udisk
+mount -t vfat -o iocharset=utf8 /dev/mtdblock5 /mnt/udisk
+rmmod g_file_storage.ko

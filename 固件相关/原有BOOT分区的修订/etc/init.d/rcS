@@ -1,0 +1,87 @@
+#!/bin/sh
+
+# mount filesystems
+/bin/mount -t proc /proc /proc
+/bin/mount -t sysfs sysfs /sys
+/bin/mount -t tmpfs tmpfs /dev
+/bin/mount -t tmpfs tmpfs /tmp
+
+################################## 
+echo "Starting udevd..." 
+/sbin/udevd --daemon 
+/sbin/udevstart 
+##################################
+
+
+# create necessary devices
+/bin/mkdir /dev/pts
+/bin/mount -t devpts devpts /dev/pts
+/bin/mknod /dev/ts c 10 16
+/bin/mknod /dev/ppp c 108 0
+/bin/mknod -m 666 /dev/sadc c 238 12
+# 串口设备端驱动
+/bin/mknod -m 666 /dev/ttygserial c 127 0
+# 安装系统分区
+/bin/mount -t ext3 /dev/mtdblock4 /opt
+# 安装用户分区
+/bin/mount -t vfat -o iocharset=utf8 /dev/mtdblock5 /mnt/udisk
+
+
+# 原系统分区分配如下
+# 0x00001000   0x00001000(misc),
+# 0x00002000   0x00002000(kernel),
+# 0x00004000   0x00004000(boot),
+# 0x00002000   0x00008000(recovery),
+# 0x00002000   0x0000a000(backup),
+# 0x00012000   0x0000c000(system),
+# 0x00002000   0x0001e000(cache),
+# 0x00004000   0x00020000(userdata),
+# 0x00004000   0x00024000(swap),
+# -@0x00028000(user)
+
+# 新系统分区分配如下
+# 0x00001000   0x00001000(misc),
+# 0x00002000   0x00002000(kernel),
+# 0x00004000   0x00004000(boot),
+# 0x00002000   0x00008000(recovery),   <=== 保持不变，最大限度防止刷坏了
+# 0x00012000   0x0000a000(system)
+#              0x0001c000(user)
+
+
+# 如果没有这个文件那么通过磁盘共享来刷system和user
+if [ ! -f /opt/installed ]; then 
+  umount /opt
+  umount /mnt/udisk
+  insmod /lib/g_file_storage.ko file=/dev/mtdblock5,/dev/mtdblock4 luns=2 stall=0 removable=1
+else
+  #检查是不是要启用USB串口
+  if [ -f /mnt/udisk/usbtty ]; then
+  	insmod /lib/g_serial.ko use_acm=1
+	#gettty @ inittab 
+  	#/sbin/getty /dev/ttygserial -L 115200 vt100 & 
+  else
+    insmod /lib/g_file_storage.ko file=/dev/mtdblock5 stall=0 removable=1
+  fi
+fi 
+
+#一次性更新脚本处理
+if [ -f /mnt/udisk/update.sh ]; then
+  sh /mnt/udisk/update.sh
+  mv /mnt/udisk/update.sh  /mnt/udisk/_update.sh
+  reboot
+else
+  if [ -f /opt/etc/rc.local ]; then
+    /opt/etc/rc.local &
+  fi
+fi
+
+#优先执行用户的启动脚本
+if [ -f /mnt/udisk/system/boot.sh ]; then
+  sh /mnt/udisk/system/boot.sh &
+else
+  #要么执行内置启动脚本 
+  if [ -f /opt/etc/rc.local ]; then
+    /opt/etc/rc.local &
+  fi
+fi
+

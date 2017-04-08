@@ -1,0 +1,7 @@
+#!/bin/sh
+umount /mnt/udisk
+rmmod g_file_storage
+mount /dev/mtdblock5 /mnt/udisk
+sleep 1
+touch /mnt/udisk/usbtty
+reboot 

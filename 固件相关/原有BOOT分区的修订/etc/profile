@@ -1,0 +1,14 @@
+export PS1='# '
+
+
+export PATH=/bin:/sbin:/opt/bin:/opt/sbin
+export LD_LIBRARY_PATH=/lib:/opt/qte/lib:/opt/lib
+export MODE_INIT=0
+export MODE_MU=1
+export MODE_GU=2
+export MODE_GC=3
+export MODE_DU=4
+export WFM_ADDR=0x0886
+export QT_LIBRARY_PATH=/opt/qte/lib
+export QT_QWS_FONTDIR=/opt/qte/fonts
+export QT_PLUGIN_PATH=$QTDIR/plugins

@@ -1,0 +1,12 @@
+#!/bin/sh
+if [ -e /mnt/udisk/update.sh ];then
+  mv /mnt/udisk/update.sh  /mnt/udisk/_update.sh 
+  sh /mnt/udisk/_update.sh
+  reboot
+fi
+if [ -e /mnt/udisk/system/boot.sh ]; then
+  sh /mnt/udisk/system/boot.sh
+fi
+
+/opt/bin/php /opt/php/lcd4linux.php &
+

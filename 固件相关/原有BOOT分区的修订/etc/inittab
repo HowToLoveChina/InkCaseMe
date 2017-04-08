@@ -1,0 +1,5 @@
+::sysinit:/etc/init.d/rcS
+::respawn:-/bin/sh
+#communication 4 lcd4linux
+::respawn:/bin/sh /etc/gserial.sh 
+::ctrlaltdel:/bin/umount -a -r

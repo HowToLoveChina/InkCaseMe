@@ -1,0 +1,7 @@
+#!/bin/sh
+
+rmmod g_serial
+umount /mnt/udisk
+insmod /lib/g_file_storage.ko file=/dev/mtdblock5 stall=0 removable=1
+
+cd -

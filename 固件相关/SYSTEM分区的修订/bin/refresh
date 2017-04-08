@@ -1,0 +1,5 @@
+#!/bin/sh
+umount /mnt/udisk
+rmmod g_file_storage
+mount /dev/mtdblock5 /mnt/udisk
+mount -t vfat -o iocharset=utf8 /dev/mtdblock5 /mnt/udisk
