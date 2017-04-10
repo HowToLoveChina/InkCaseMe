@@ -1,7 +1,9 @@
 # InkCaseMe
 
 
-Windows带usbtty功能  https://wiztrader.ctfile.com/fs/hrS196017989
+Windows带usbtty功能  20170406 https://wiztrader.ctfile.com/fs/hrS196017989
+
+修正双重启动等已知问题 20170410 https://wiztrader.ctfile.com/fs/PAs197383276
 
 本教程Windows刷机部分由tomac撰写，供具有一定Linux使用知识的人使用。本人不承担任何相关责任。
    请从 https://wiztrader.ctfile.com/fs/GRj195197252  下载刷机工具包
