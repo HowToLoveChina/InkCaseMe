@@ -28,6 +28,7 @@ define("BOOK_SIZE", APP_BASE . "booksizet");
 
 if(DEBUG == 0){
 	define("FONT","/opt/qte/fonts/msyh.ttf");
+	define("REFRESH_COUNT",'/tmp/ebook_count');
 }else{
 	header ("Content-type: image/bmp");
 	define("REFRESH_COUNT",'ebook_count');
