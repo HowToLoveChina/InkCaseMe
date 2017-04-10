@@ -1,18 +1,5 @@
 <?php
 
-#电子显示器
-
-#打开一个管道
-
-#读取显示数据
-
-#格式是BASE64
-
-#
-
-
-
-
 class Pipe{
     public  $fifoPath;
     private $w_pipe;
@@ -103,3 +90,4 @@ class Pipe{
         return unlink($this->fifoPath);
     }
 }
+
