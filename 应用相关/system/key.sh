@@ -9,19 +9,26 @@ date +%s > /tmp/keystamp
 app=`cat /mnt/udisk/app.txt`
 #根据不同的应用分发给程序
 if [ x$1 == x28 ]; then
+	#单击
 	/opt/bin/php /mnt/udisk/${app}/${app}.php n
 	exit
 fi
 
 if [ x$1 == x63 ]; then
+	#长按
 	/opt/bin/php /mnt/udisk/${app}/${app}.php p
 	exit
 fi
 
 if [ x$1 == x33 ]; then
+	/opt/bin/php /mnt/udisk/${app}/${app}.php e
+	exit
 fi
 
 
 if [ x$1 == x66 ]; then
+	#双击
+	/opt/bin/php /mnt/udisk/${app}/${app}.php d
+	exit
 fi
 
