@@ -25,3 +25,7 @@
 系统用最好的语言PHP为基础
 
 电纸书请把要看的TXT保存成  UTF8格式，然后复制到设备的ebook目录下，文件名为book.txt 。单击为看下页，长按是上页
+
+
+
+常见问题请移步：https://github.com/HowToLoveChina/InkCaseMe/wiki
