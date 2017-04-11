@@ -2,12 +2,16 @@
 
 
 （推荐下载）原版固件：https://wiztrader.ctfile.com/fs/dCd197387966
+
 （推荐下载）DIY固件：修正双重启动等已知问题 20170410 https://wiztrader.ctfile.com/fs/PAs197383276
-       （过时）Windows带usbtty功能  20170406 https://wiztrader.ctfile.com/fs/hrS196017989
+
+（过时）Windows带usbtty功能  20170406 https://wiztrader.ctfile.com/fs/hrS196017989
+
 
 
 本教程Windows刷机部分由tomac撰写，供具有一定Linux使用知识的人使用。本人不承担任何相关责任。
-   请从下载下载刷机工具包 原版固件和DIY固件 
+
+请从下载下载刷机工具包 原版固件和DIY固件 
 
 1.连接USB以后长按设备上的按钮，运行原版固件中的AndroidTool ，先按"低格"，再点"执行"，待设备重启后执行下步。
 
