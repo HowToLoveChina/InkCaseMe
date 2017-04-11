@@ -55,8 +55,9 @@ function imagefile($im,$file,$mode){
 
 
 
-** 系统运行流程 **
-# /etc/init.d/rcS
+# 系统运行流程 
+
+** /etc/init.d/rcS **
 1.   检查system user 是否正常 ，如果不可用，那么通过 g_file_storage 把这两个区挂出来，供用户在操作系统里刷写
 
 2.   检查有没有 /mnt/udisk/usbtty 如果有，那么不挂U盘，变成usb串口，
@@ -66,12 +67,12 @@ function imagefile($im,$file,$mode){
 4.   检查有没有 /mnt/udisk/system/boot.sh 如果有，那么执行，否则执行  /opt/etc/rc.local
 
 
-** 待机处理 **
+# 待机处理 
 
 在 /mnt/udisk/system/sleep.php 定期检查有没有按键，如果长时间没有按键，进入standby模式，待机12小时也不少1%的电。
 
 
-** 按键处理 **
+# 按键处理 
 
 /mnt/udisk/system/boot.sh 中最后启动  button 程序，如果有按键，将键值交给 key.sh 
 
