@@ -1,6 +1,8 @@
 # InkCaseMe
 
 
+ (推荐下载) 图文刷机教程：https://wiztrader.ctfile.com/fs/FfC198007421 （感谢作者：天気雨 QQ:727999552）
+ 
 （推荐下载）原版固件：https://wiztrader.ctfile.com/fs/dCd197387966
 
 （推荐下载）DIY固件：修正双重启动等已知问题 20170410 https://wiztrader.ctfile.com/fs/PAs197383276
