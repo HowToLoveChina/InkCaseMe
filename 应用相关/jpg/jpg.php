@@ -23,16 +23,18 @@ while($item = readdir($dh) ){
   if( $item{0} == "."){
     continue;
   }
-  if( ! strstr(strtolower($item),"jpg" ) ){
-    continue;
+  $r = pathinfo(strtolower($item));
+  if( $r['extension'] != "jpg" ){
+  	continue;
   }
   $afn [] = $item;
 }
 #按字节顺序对文件名排序
 sort($afn);
 
-$jpg = get_next_file( $afn );
-showjpg( APP_BASE . $jpg );
+$jpg = APP_BASE . get_next_file( $afn );
+echo $jpg;
+showjpg( $jpg );
 
 function get_next_file(array $afn ){
   define("IDX_FILE", APP_BASE . "index" );
@@ -50,7 +52,8 @@ function get_next_file(array $afn ){
   }
   $fn %= sizeof($afn);
   file_put_contents( IDX_FILE , $fn );
-  return $afn[$n];
+  var_dump($afn);
+  return $afn[$fn];
 }
 $jpg = $afn[$fn];
 

@@ -25,6 +25,11 @@ if [ x$1 == x33 ]; then
 	exit
 fi
 
+if [ x$1 == x61 ]; then
+	#唤醒以后获得这个
+	/opt/bin/php /mnt/udisk/${app}/${app}.php n
+	exit
+fi
 
 if [ x$1 == x66 ]; then
 	#双击
