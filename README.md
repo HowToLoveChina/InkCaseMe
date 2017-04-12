@@ -1,5 +1,15 @@
 # InkCaseMe
 
+简介:InkCase i5  (拆机图请移步：http://bbs.mydigit.cn/read.php?tid=2006268 )
+
+经过大家的努力，现在已经可以做为独立的电纸书来使用。
+
+目前的功能有：
+
+1、电纸书应用 ebook  作者：索马里的海贼(QQ:3298302054)
+
+2、图片浏览   jpg 
+
 
  (推荐下载) 图文刷机教程：https://wiztrader.ctfile.com/fs/FfC198007421 （感谢作者：天気雨 QQ:727999552）
  
