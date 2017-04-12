@@ -37,7 +37,7 @@
 常见问题请移步：https://github.com/HowToLoveChina/InkCaseMe/wiki
 
 
-** 应用编写原理 ** 
+# 应用编写原理 
 
 根目录的 app.txt 存放当前设备的工作应用名称，比如 test 
 
