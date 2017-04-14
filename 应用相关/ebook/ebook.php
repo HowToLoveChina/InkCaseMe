@@ -1,11 +1,10 @@
 <?php
-define("APP_BASE",dirname(__FILE__) . "/" );
-include(APP_BASE."/../system/inkcase5.inc.php");
+
 /*
   20170407 加入定期全刷，减少越来越黑的问题
   20170407 读取电池电量显示在右下角
   20170407 加入standby处理，减少功耗
-  20170408 待机功能交给sleep脚本处理，不在这里处理
+  20170414 standby 
 */
 
 /*
@@ -17,24 +16,37 @@ include(APP_BASE."/../system/inkcase5.inc.php");
 * 半角字符导致页面显示不整齐
 */
 
+mb_internal_encoding("UTF-8");
 define("FONT_SIZE",18);		//显示字体大小
 define("SPAN", 27); 		//行间距
 define("ROW", 21); 			//屏幕可以容纳总行数
 define("COL", 14); 			//每行字数
+define("SCREEN_W", 360);
+define("SCREEN_H", 600);
+define("DEBUG",0); 			// 1 直接输出到浏览器，0输出到 /dev/fb 
+define("FAST_MODE",true);		// 快速刷新，即到了刷新页时，当页反白，减少等待时间
 
-define("BOOK_FILE", APP_BASE . "book.txt");
-define("BOOK_STATUS", APP_BASE . "bookstatus");
-define("BOOK_SIZE", APP_BASE . "booksizet");
+global $NEED_REFRESH;
+$NEED_REFRESH=false;			// 为真时反白显示
 
 if(DEBUG == 0){
-	define("FONT","/opt/qte/fonts/msyh.ttf");
+	define("FONT", "/opt/qte/fonts/msyh.ttf");
+	define("BOOK_FILE",'/mnt/udisk/ebook/book.txt');
+	define("BOOK_STATUS",'/opt/bookstatus');
+	define("BOOK_SIZE",'/opt/booksize');
 	define("REFRESH_COUNT",'/tmp/ebook_count');
 }else{
 	header ("Content-type: image/bmp");
+	define("FONT", "msyh.ttf");
+	define("BOOK_FILE",'book.txt');
+	define("BOOK_STATUS",'bookstatus');
+	define("BOOK_SIZE",'booksize');
 	define("REFRESH_COUNT",'ebook_count');
 	$argc = 2;
 	$argv = array('','n');
 }
+#唤醒设备
+
 
 //
 if ($argc !== 2) {
@@ -116,7 +128,7 @@ function welcome() {
     imagettftext($bg, 15, 0, 30, 280, $black, FONT, "再次来到这个页面就可以按键看书了");
     
     imagettftext($bg, 20, 0, 20, 330, $black, FONT, "关于:");
-    imagettftext($bg, 18, 0, 30, 380, $black, FONT, "开发:索马里的海贼(QQ:3298302054)");
+    imagettftext($bg, 18, 0, 30, 380, $black, FONT, "致谢:wizcom<zhuhu@info.net.cn>");
     
     imagettftext($bg, 35, 0, 35, 480, $black, FONT, "按键开始阅读");
     imagettftext($bg, 15, 0, 55, 520, $black, FONT, "单击(下一页) 双击(上一页)");
@@ -178,6 +190,7 @@ function SBC_DBC($str) {
 }
 
 function refresh(){
+  global $NEED_REFRESH;
   if (!file_exists(REFRESH_COUNT)) {
     file_put_contents(REFRESH_COUNT,"0");
   }
@@ -187,6 +200,11 @@ function refresh(){
   if( $n%5!=4 || DEBUG){
     return;
   }
+  if ( FAST_MODE ){
+    $NEED_REFRESH=true;
+    return;
+  }  
+  echo "refresh\n";
   //! 定期刷白
   $im = imagecreatetruecolor(SCREEN_W,SCREEN_H);
   outFunc($im);
@@ -201,11 +219,17 @@ function refresh(){
  *读取合适长度的一页并显示
  */
 function getPage($offset) {
+    global $NEED_REFRESH;
     $file  = BOOK_FILE;
     $fsize = filesize($file);
     $bg    = imagecreatetruecolor(SCREEN_W, SCREEN_H);
+    if( $NEED_REFRESH ){
+    $black = imagecolorallocate($bg, 255, 255, 255);
+    $white = imagecolorAllocate($bg, 0, 0, 0);
+    }else{
     $white = imagecolorallocate($bg, 255, 255, 255);
     $black = imagecolorAllocate($bg, 0, 0, 0);
+    }
     imagefill($bg, 0, 0, $white);
     $fp = fopen($file, "rb");
     fseek($fp, $offset);
