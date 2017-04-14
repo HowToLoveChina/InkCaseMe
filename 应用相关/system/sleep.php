@@ -25,12 +25,16 @@ while(true){
 	$delta = time()-file_get_contents("/tmp/keystamp");
 	if( $delta > 30 ){
 		file_put_contents('/tmp/keystamp',time());
-		draw_bitmap($Zz,10,587);
+		if( file_exists("/mnt/udisk/standby.jpg") ){
+		  system("/opt/bin/php /tmp/system/showjpg.php /mnt/udisk/standby.jpg");
+		}else{
+		  draw_bitmap($Zz,10,587);
+		}
 		#让设备有时间画出来
 		sleep(1);
 		file_put_contents("/sys/android_power/state","standby");
-		#唤醒以后立即刷新一次应用
-		system ( "/bin/sh /mnt/udisk/system/key.sh 28" );
+		#唤醒以后立即刷新一次应用,改成在key里接受按键事件来处理
+		#system ( "/bin/sh /mnt/udisk/system/key.sh 28" );
 	}else{
 		sleep(5);
 	}	
