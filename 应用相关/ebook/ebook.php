@@ -19,7 +19,7 @@
 */
 
 define("DEBUG",0);
-define("PADDING", 8); //四周留空
+define("PADDING", 10); //四周留空
 define("APP_BASE",dirname(__FILE__) . "/" );
 define("BOOK_SELECTED",'/mnt/udisk/ebook/current_book');
 define("MENU_COUNT",'/tmp/menu_count');
@@ -225,6 +225,7 @@ function getPage($offset) {
         }
 		if($width +PADDING*2 >SCREEN_W){
 			$sline = mb_substr($sline,0,-1);
+			$i--;//bugfix:上一行丢结尾一个字
 			imagettftext($bg, FONT_SIZE, 0, PADDING, 30 + $line * SPAN, $black, FONT, $sline);
             $line++;
             $offset += strlen($sline);
