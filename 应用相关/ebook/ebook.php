@@ -264,7 +264,7 @@ function getPage($offset) {
   $rate = sprintf("%5.2f%%",$offset*100/$g_book_var['size']); 
   imagettftext($bg, 13, 0, 10, 598, $black, FONT, $rate);
     
-  imagettftext($bg, 13, 0, 70, 598, $black, FONT, substr($file,17));//显示图书名
+  imagettftext($bg, 13, 0, 70, 598, $black, FONT, substr(BOOK_NAME,17));//显示图书名
     
   outFunc($bg, "/dev/fb", 1);
   imagedestroy($bg);
@@ -420,6 +420,8 @@ function env_init(){
     file_put_contents(BOOK_SELECTED,'book.txt');
   }
   $current_book = file_get_contents(BOOK_SELECTED);
+  #用于在界面上显示文件名
+  define('BOOK_NAME',$current_book);
   $fn = APP_BASE . $current_book;
   if( ! file_exists($fn) ){
     file_put_contents(BOOK_SELECTED,'book.txt');
