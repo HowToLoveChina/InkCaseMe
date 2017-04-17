@@ -264,7 +264,7 @@ function getPage($offset) {
   $rate = sprintf("%5.2f%%",$offset*100/$g_book_var['size']); 
   imagettftext($bg, 13, 0, 10, 598, $black, FONT, $rate);
     
-  imagettftext($bg, 13, 0, 70, 598, $black, FONT, substr(BOOK_NAME,17));//显示图书名
+  imagettftext($bg, 13, 0, 70, 598, $black, FONT, BOOK_NAME);//显示图书名
     
   outFunc($bg, "/dev/fb", 1);
   imagedestroy($bg);
