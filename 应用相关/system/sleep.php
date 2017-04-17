@@ -19,9 +19,18 @@ $Zz = [
   "0000000000000000000",   
   "0000000000000000000",   
 ];
-#计算未按键时间多于30秒就睡觉，如果连接着USB，会睡不成，所以不再单独处理
+# 计算未按键时间多于30秒就睡觉，如果连接着USB，会睡不成，所以不再单独处理
 file_put_contents('/tmp/keystamp',time());
+define("VBUS_STATUS","/sys/bus/platform/drivers/dwc_otg/vbus_status");
+
+# 获得原始状态，相应的功能在启动脚本中已经处理
+$last_usb = intval(file_get_contents(VBUS_STATUS));
+# 把USB当成串口用的应用时，不挂载
+$app = file_get_contents("/mnt/udisk/app.txt");
+$flag = file_exists(sprintf("/mnt/udisk/%s/usbserial.txt",$app));
 while(true){
+	#睡一秒，让机器反应一下
+	sleep(1);
 	$delta = time()-file_get_contents("/tmp/keystamp");
 	if( $delta > 30 ){
 		file_put_contents('/tmp/keystamp',time());
@@ -34,28 +43,26 @@ while(true){
 		sleep(1);
 		file_put_contents("/sys/android_power/state","standby");
 		#唤醒以后立即刷新一次应用,改成在key里接受按键事件来处理
-		#system ( "/bin/sh /mnt/udisk/system/key.sh 28" );
-	}else{
-		sleep(5);
-	}	
-}	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+		continue;
+	}//if delta
+	#作为串口使用时，不处理
+	if( file_exists("/mnt/udisk/usbtty" ) ){
+	  continue;
+	}//if usbtty
+	# 不作为
+	$fc = intval(file_get_contents(VBUS_STATUS));
+	if( $last_usb != $fc && ! $flag ){
+	  #usb状态有变化
+	  if( $fc > 0 ){
+	    //上电了,卸载U盘，挂载服务
+	    system("/bin/umount /mnt/udisk");
+	    system("/sbin/insmod /lib/g_file_storage.ko file=/dev/mtdblock5 stall=0 removable=1");
+	  }else{
+	    //掉电了，挂载U盘
+	    system("rmmod g_file_storage.ko");
+	    system("umount /mnt/udisk");
+	    system("mount -t vfat -o iocharset=utf8 /dev/mtdblock5 /mnt/udisk");
+	  }
+	  $last_usb = $fc;
+	}//if change	
+}//while

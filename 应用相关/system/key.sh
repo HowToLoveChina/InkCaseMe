@@ -5,6 +5,10 @@ key=$1
 #将当前时间写入内存文件
 date +%s > /tmp/keystamp
 
+#没有指定APP时，按键不理，也可能是因为文件系统被挂载了
+if [ ! -e /mnt/udisk/app.txt ]; then
+  exit;
+fi 
 #取得当前的应用
 app=`cat /mnt/udisk/app.txt`
 #根据不同的应用分发给程序
