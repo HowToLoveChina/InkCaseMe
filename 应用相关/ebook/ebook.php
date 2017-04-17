@@ -94,7 +94,7 @@ function welcome() {
     imagefill($bg, 0, 0, $white);
     imagettftext($bg, 30, 0, 20, 80, $black, FONT, "inkcase i5 txt阅读器");//
     imagettftext($bg, 20, 0, 20, 120, $black, FONT, "使用说明:");//
-    imagettftext($bg, 15, 0, 30, 160, $black, FONT, "将utf-8格式的txt文本改名为 book.txt");
+    imagettftext($bg, 15, 0, 30, 160, $black, FONT, "将utf-8格式的txt文本放在ebook目录下");
     imagettftext($bg, 15, 0, 30, 190, $black, FONT, "放入inkcase连接电脑后的磁盘根目录");
     imagettftext($bg, 15, 0, 30, 220, $black, FONT, "电脑上安全卸载inkcase磁盘");
     imagettftext($bg, 15, 0, 30, 250, $black, FONT, "拔掉USB线后按住按钮直到重启");
@@ -104,9 +104,9 @@ function welcome() {
     imagettftext($bg, 18, 0, 30, 380, $black, FONT, "开发:");
     imagettftext($bg, 18, 0, 30, 410, $black, FONT, "     索马里的海贼(QQ:3298302054)");
     imagettftext($bg, 18, 0, 30, 430, $black, FONT, "     wuhy(QQ:10249082)");
-    
+    //   
     imagettftext($bg, 35, 0, 35, 480, $black, FONT, "按键开始阅读");
-    imagettftext($bg, 15, 0, 55, 520, $black, FONT, "单击(下一页) 双击(上一页)");
+    imagettftext($bg, 15, 0, 55, 520, $black, FONT, "单击(下一页) 长按(上一页) 双击 (菜单)");
     outFunc($bg);
     imagedestroy($bg);
 }
