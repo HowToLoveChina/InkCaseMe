@@ -19,6 +19,7 @@
 */
 
 define("DEBUG",0);
+define("PADDING", 8); //四周留空
 define("APP_BASE",dirname(__FILE__) . "/" );
 define("BOOK_SELECTED",'/mnt/udisk/ebook/current_book');
 define("MENU_COUNT",'/tmp/menu_count');
@@ -115,58 +116,12 @@ function welcome() {
 ################################################################################
 function outFunc($im){
 	if(DEBUG){
-		imagebwbmp($im);
+		imagepng($im);//浏览器调试直接用gd内置函数
 	}else{
 		imagefile($im,"/dev/fb",1);
 	}
 }
-################################################################################
-################################################################################
-function SBC_DBC($str) {
-    $DBC = Array(
-        '０' , '１' , '２' , '３' , '４' ,
-        '５' , '６' , '７' , '８' , '９' ,
-        'Ａ' , 'Ｂ' , 'Ｃ' , 'Ｄ' , 'Ｅ' ,
-        'Ｆ' , 'Ｇ' , 'Ｈ' , 'Ｉ' , 'Ｊ' ,
-        'Ｋ' , 'Ｌ' , 'Ｍ' , 'Ｎ' , 'Ｏ' ,
-        'Ｐ' , 'Ｑ' , 'Ｒ' , 'Ｓ' , 'Ｔ' ,
-        'Ｕ' , 'Ｖ' , 'Ｗ' , 'Ｘ' , 'Ｙ' ,
-        'Ｚ' , 'ａ' , 'ｂ' , 'ｃ' , 'ｄ' ,
-        'ｅ' , 'ｆ' , 'ｇ' , 'ｈ' , 'ｉ' ,
-        'ｊ' , 'ｋ' , 'ｌ' , 'ｍ' , 'ｎ' ,
-        'ｏ' , 'ｐ' , 'ｑ' , 'ｒ' , 'ｓ' ,
-        'ｔ' , 'ｕ' , 'ｖ' , 'ｗ' , 'ｘ' ,
-        'ｙ' , 'ｚ' , '－' , '　' , '：' ,
-        '．' , '，' , '／' , '％' , '＃' ,
-        '！' , '＠' , '＆' , '（' , '）' ,
-        '＜' , '＞' , '＂' , '＇' , '？' ,
-        '［' , '］' , '｛' , '｝' , '＼' ,
-        '｜' , '＋' , '＝' , '＿' , '＾' ,
-        '￥' , '￣' , '｀'
-    );
-    $SBC = Array(
-        '0', '1', '2', '3', '4',
-        '5', '6', '7', '8', '9',
-        'A', 'B', 'C', 'D', 'E',
-        'F', 'G', 'H', 'I', 'J',
-        'K', 'L', 'M', 'N', 'O',
-        'P', 'Q', 'R', 'S', 'T',
-        'U', 'V', 'W', 'X', 'Y',
-        'Z', 'a', 'b', 'c', 'd',
-        'e', 'f', 'g', 'h', 'i',
-        'j', 'k', 'l', 'm', 'n',
-        'o', 'p', 'q', 'r', 's',
-        't', 'u', 'v', 'w', 'x',
-        'y', 'z', '-', ' ', ':',
-        '.', ',', '/', '%', '#',
-        '!', '@', '&', '(', ')',
-        '<', '>', '"', '\'','?',
-        '[', ']', '{', '}', '\\',
-        '|', '+', '=', '_', '^',
-        '$', '~', '`'
-    );
-	return str_replace($SBC, $DBC, $str);
-}
+
 ################################################################################
 # 计算刷新次数择时重刷 
 ################################################################################
@@ -221,31 +176,65 @@ function getPage($offset) {
   $fp = fopen(BOOK_FILE, "rb");
   fseek($fp, $offset);
   $string = fread($fp, 2048);
-  $string = str_replace("    ","  ",$string); //有些小说开头4个空格 转换为全角的话4个字符的空格比较难看，所以换成2个空格
   fclose($fp);
-  $content  = '';
-  $i        = 0;
-  $line     = 0;
-  $autowrap = 0;
-  while ($line < ROW) {
-    $pos = mb_strpos(mb_substr($string, $i, COL), "\n");
-    if ($pos !== false) {
-      $content .= $sline = mb_substr($string, $i, $pos + 1);
-      $i += $pos + 1;
-    } else {
-      //$content .= mb_substr($string, $i, COL) . "\n";
-      $content .= $sline = mb_substr($string, $i, COL) . "\n"; 
-      $i += COL;
-      $autowrap++;
-    }
-    //! 分行显示加点间距
-    $sline = SBC_DBC($sline);
-    imagettftext($bg, FONT_SIZE, 0, 8, 30 + $line * SPAN, $black, FONT, $sline);
-    //! 
-    $line++;
-  }
-  $nnnn_count = mb_substr_count($content,"  "); 
-  $offset += strlen($content) - $autowrap + $nnnn_count*2; //替换4个空格为2个之后 要重新计算offset
+	$i        = 0;
+    $w_config = checkFont();
+    $sline    = '';
+    $width    = 0;
+    $lastword = '';
+    $line     = 0;
+    while (1) {
+        $word = mb_substr($string, $i, 1);
+        $i++;
+        $sline .= $word;
+        if (ord($word) < 127) {
+            $width += $w_config['en_width'][ord($word)];
+            if ($lastword !== '') {
+                if ($lastword == 'en') {
+                    $width += $w_config['en_pad'];
+                } else {
+                    $width += $w_config['hybid_pad'];
+                }
+            } else {
+                $width += $w_config['cn_pad'];
+            }
+            $lastword = 'en';
+        } else {
+            $width += $w_config['cn_width'];
+            if ($lastword !== '') {
+                if ($lastword == 'en') {
+                    $width += $w_config['hybid_pad'];
+                } else {
+                    $width += $w_config['cn_pad'];
+                }
+            } else {
+                $width += $w_config['cn_pad'];
+            }
+            $lastword = 'cn';
+        }
+		
+        if ($word == "\n") {
+            imagettftext($bg, FONT_SIZE, 0, PADDING, 30 + $line * SPAN, $black, FONT, $sline);
+            $line++;
+            $offset += strlen($sline);
+            $sline = '';
+            if (($line + 1) * SPAN + 30 > SCREEN_H) {
+                break;
+            }
+            $width = 0;
+        }
+		if($width +PADDING*2 >SCREEN_W){
+			$sline = mb_substr($sline,0,-1);
+			imagettftext($bg, FONT_SIZE, 0, PADDING, 30 + $line * SPAN, $black, FONT, $sline);
+            $line++;
+            $offset += strlen($sline);
+            $sline = '';
+            if (($line + 1) * SPAN + 30 > SCREEN_H) {
+                break;
+            }
+            $width = 0;
+		}
+	}
   /*
    *电池电量
   */
@@ -270,83 +259,7 @@ function getPage($offset) {
   imagedestroy($bg);
   return $offset;
 }
-################################################################################
-# 测试时的图片输出
-################################################################################
-function imagebwbmp($image, $to = null, $threshold = 0.5)
-{
-    if (func_num_args() < 1) {
-        $fmt = "imagebwbmp() expects a least 1 parameters, %d given";
-        trigger_error(sprintf($fmt, func_num_args()), E_USER_WARNING);
-        return;
-    }
-    if (!is_resource($image)) {
-        $fmt = "imagebwbmp() expects parameter 1 to be resource, %s given";
-        trigger_error(sprintf($fmt, gettype($image)), E_USER_WARNING);
-        return;
-    }
-    if (!is_numeric($threshold)) {
-        $fmt = "imagebwbmp() expects parameter 3 to be float, %s given";
-        trigger_error(sprintf($fmt, gettype($threshold)), E_USER_WARNING);
-        return;
-    }
 
-    if (get_resource_type($image) !== 'gd') {
-        $msg = "imagebwbmp(): supplied resource is not a valid gd resource";
-        trigger_error($msg, E_USER_WARNING);
-        return false;
-    }
-    switch (true) {
-        case $to === null:
-            break;
-        case is_resource($to) && get_resource_type($to) === 'stream':
-        case is_string($to) && $to = fopen($to, 'wb'):
-            if (preg_match('/[waxc+]/', stream_get_meta_data($to)['mode'])) {
-                break;
-            }
-        default:
-            $msg = "imagebwbmp(): Invalid 2nd parameter, it must a writable filename or a writable stream";
-            trigger_error($msg, E_USER_WARNING);
-            return false;
-    }
-
-    if ($to === null) {
-        $to = fopen('php://output', 'wb');
-    }
-
-    $biWidth = imagesx($image);
-    $biHeight = imagesy($image);
-    $biSizeImage = ((int)ceil($biWidth / 32) * 32 / 8 * $biHeight);
-    $bfOffBits = 54 + 4 * 2; // Use two colors (black and white)
-    $bfSize = $bfOffBits + $biSizeImage;
-    
-    fwrite($to, 'BM');
-    fwrite($to, pack('VvvV', $bfSize, 0, 0, $bfOffBits));
-    fwrite($to, pack('VVVvvVVVVVV', 40, $biWidth, $biHeight, 1, 1, 0, $biSizeImage, 0, 0, 0, 0));
-    fwrite($to, "\xff\xff\xff\x00"); // white
-    fwrite($to, "\x00\x00\x00\x00"); // black
-    
-    for ($y = $biHeight - 1; $y >= 0; --$y) {
-        $byte = 0;
-        for ($x = 0; $x < $biWidth; ++$x) {
-            $rgb = imagecolorsforindex($image, imagecolorat($image, $x, $y));
-            $value = (0.299 * $rgb['red'] + 0.587 * $rgb['green'] + 0.114 * $rgb['blue']) / 0xff;
-            $color = (int)($value > $threshold);
-            $byte = ($byte << 1) | $color;
-            if ($x % 8 === 7) {
-                fwrite($to, pack('C', $byte));
-                $byte = 0;
-            }
-        }
-        if ($x % 8) {
-            fwrite($to, pack('C', $byte << (8 - $x % 8)));
-        }
-        if ($x % 32) {
-            fwrite($to, str_repeat("\x00", (int)((32 - $x % 32) / 8)));
-        }
-    }
-    return true;
-}
 ################################################################################
 # 菜单处理
 ################################################################################
@@ -497,4 +410,42 @@ function menu_process( $page ){
 ################################################################################
 function save_book_selected($fn){
   file_put_contents(BOOK_SELECTED,$fn);
+}
+
+################################################################################
+# 生成字体配置信息
+################################################################################
+function checkFont() {
+	if(!file_exists(APP_BASE.basename(FONT,".ttf")."-".FONT_SIZE.".fconf")){
+		$size_cn   = ImageTTFBBox(FONT_SIZE, 0, FONT, "日");
+		$size_cn_w = $size_cn[4] - $size_cn[0];
+		$size_cn_h = $size_cn[5] - $size_cn[1];
+    
+		$size_en   = ImageTTFBBox(FONT_SIZE, 0, FONT, "a");
+		$size_en_w = $size_en[4] - $size_en[0];
+		$size_en_h = $size_en[5] - $size_en[1];
+    
+		$size_en     = ImageTTFBBox(FONT_SIZE, 0, FONT, "aa");
+		$size_en_pad = $size_en[4] - $size_en[0] - $size_en_w * 2;
+    
+		$size_cn     = ImageTTFBBox(FONT_SIZE, 0, FONT, "日日");
+		$size_cn_pad = $size_cn[4] - $size_cn[0] - $size_cn_w * 2;
+    
+		$size_hybid     = ImageTTFBBox(FONT_SIZE, 0, FONT, "日a");
+		$size_hybid_pad = $size_hybid[4] - $size_hybid[0] - $size_en_w - $size_cn_w;
+	
+		for($i=0;$i<127;$i++){
+			$size_en   = ImageTTFBBox(FONT_SIZE, 0, FONT, chr($i));
+			$size_en_array[$i] =$size_en[4] - $size_en[0];
+		}
+		file_put_contents(APP_BASE.basename(FONT,".ttf")."-".FONT_SIZE.".fconf",serialize(array(
+			'cn_width' => $size_cn_w,
+			'cn_height' => $size_cn_h,
+			'en_width' => $size_en_array,
+			'cn_pad' => $size_cn_pad,
+			'en_pad' => $size_en_pad,
+			'hybid_pad' => $size_hybid_pad
+		)));
+	}
+	return unserialize(file_get_contents(APP_BASE.basename(FONT,".ttf")."-".FONT_SIZE.".fconf"));
 }
