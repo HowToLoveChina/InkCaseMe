@@ -344,7 +344,7 @@ function env_init(){
   if(DEBUG == 0){
   }else{
     define("FONT","/opt/qte/fonts/msyh.ttf");
-    header ("Content-type: image/bmp");
+    header ("Content-type: image/png");
     $argc = 2;
     $argv = array('','n');
   }
