@@ -10,12 +10,128 @@ define("SCREEN_H", 600);
 define("DEFAULT_FONTFILE","/opt/qte/fonts/msyh.ttf");
 
 
+#大休眠图
+define("PIC_STANDBY","/tmp/system/resource/standby.jpg");
+#小休眠图
+define("PIC_ZZ","/tmp/system/resource/zz.jpg");
+
+#关机图
+define("PIC_POWEROFF","/tmp/system/resource/poweroff.jpg");
+#小关机图
+define("PIC_OFF","/tmp/system/resource/off.jpg");
+
+
+#USB连接图
+define("PIC_USB","/tmp/system/resource/standby.jpg");
+#开机图,断开USB图
+define("PIC_LOGO","/mnt/udisk/logo.jpg");
+
+
+
+#定义字模  19x13
+global $Zz,$Off;
+$Zz = [ 
+  "0000000000000000000",
+  "0000000000000000000",
+  "0000000000000000000",
+  "0001111111000000000",
+  "0000000010000000000",
+  "0000000100000000000",   
+  "0000001000011110000",   
+  "0000010000000100000",   
+  "0000100000001000000",   
+  "0001111111011110000",   
+  "0000000000000000000",   
+  "0000000000000000000",   
+  "0000000000000000000",   
+];
+$Off = [ 
+  "0000000000000000000",
+  "0000000001000000000",
+  "0000001001001000000",
+  "0000100001000010000",
+  "0001000001000001000",   
+  "0010000000000000100",   
+  "0100000000000000010",   
+  "0010000000000000100",   
+  "0001000000000001000",   
+  "0000100000000010000",   
+  "0000010000000100000",   
+  "0000000101010000000",
+  "0000000000000000000"
+];
+
+
+
 if( DEBUG ){
   #如果是在本地调试可以在浏览器中输出，执行一下这里就够了
   function imagefile(resource $im , string $filename , int  $fbmode ){
     imagejpeg($im);
     return ;
   }
+}
+
+###############################################################
+#显示睡眠图标
+###############################################################
+function show_zz(){
+  global $Zz;
+  if( file_exists(PIC_STANDBY) ){
+    showjpg(PIC_STANDBY);
+    return;
+  }
+  if( file_exists(PIC_ZZ) ){
+    attachjpg(PIC_ZZ,10,578,19,13);
+    return;
+  }
+  draw_bitmap($Zz,10,587);
+}
+###############################################################
+#显示关机图标
+###############################################################
+function show_off(){
+  global $Off;
+  if( file_exists(PIC_POWEROFF) ){
+    showjpg(PIC_POWEROFF);
+    return;
+  }
+  if( file_exists(PIC_OFF) ){
+    attachjpg(PIC_OFF,10,578,19,13);
+    return;
+  }
+  draw_bitmap($Off,10,587);
+}
+
+###############################################################
+#以像素模式把图像附加上去
+###############################################################
+function attachjpg(string $file,int $x,int $y,int $w,int $h){
+    $im = imagecreatefromjpeg($file);
+    $newim = imagecreatetruecolor($w,$h);
+    if( $im === false ){
+      return;
+    }
+    $pic_width = imagesx($im);
+    $pic_height = imagesy($im);
+    if(function_exists("imagecopyresampled")){
+       imagecopyresampled($newim,$im,0,0,0,0,$w,$h,$pic_width,$pic_height);
+    }else{
+       imagecopyresized($newim,$im,0,0,0,0,$w,$h,$pic_width,$pic_height);
+    }
+    imagedestroy($newim);
+    $fp = fopen("/dev/fb","wb+");
+    for($i=0;$i<$y;$i++){
+      $s = "";
+      for($j=0;$j<$x;$j++){
+	$co = imagecolorat($j,$i);
+	$rgb565 = (($co >> 8) & 0xF800) | (($co>> 5) & 0x07E0 ) | (($co >> 3) & 0x001F );
+	$s .= pack("S",$rgb565);
+      }	
+      fseek($fp,($y+$i)*720 + $x*2,0);
+      fwrite($fp,$s);
+    }
+    fclose($fp);
+    imagedestroy($im);
 }
 
 ###############################################################

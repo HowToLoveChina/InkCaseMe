@@ -37,7 +37,7 @@ echo $jpg;
 showjpg( $jpg );
 
 function get_next_file(array $afn ){
-  define("IDX_FILE", APP_BASE . "index" );
+  define("IDX_FILE","/tmp/jpg.index");
   if( ! file_exists( IDX_FILE ) ){
     file_put_contents( IDX_FILE , "-1");	
   }

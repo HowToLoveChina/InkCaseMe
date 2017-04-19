@@ -3,25 +3,13 @@
 #引入功能库
 include_once(dirname(__FILE__)."/inkcase5.inc.php");
 
-#定义字模
-$Zz = [ 
-  "0000000000000000000",
-  "0000000000000000000",
-  "0000000000000000000",
-  "0001111111000000000",
-  "0000000010000000000",
-  "0000000100000000000",   
-  "0000001000011110000",   
-  "0000010000000100000",   
-  "0000100000001000000",   
-  "0001111111011110000",   
-  "0000000000000000000",   
-  "0000000000000000000",   
-  "0000000000000000000",   
-];
+
+
 # 计算未按键时间多于30秒就睡觉，如果连接着USB，会睡不成，所以不再单独处理
 file_put_contents('/tmp/keystamp',time());
 define("VBUS_STATUS","/sys/bus/platform/drivers/dwc_otg/vbus_status");
+
+
 
 # 获得原始状态，相应的功能在启动脚本中已经处理
 $last_usb = intval(file_get_contents(VBUS_STATUS));
@@ -34,11 +22,7 @@ while(true){
 	$delta = time()-file_get_contents("/tmp/keystamp");
 	if( $delta > 30 ){
 		file_put_contents('/tmp/keystamp',time());
-		if( file_exists("/mnt/udisk/standby.jpg") ){
-		  system("/opt/bin/php /tmp/system/showjpg.php /mnt/udisk/standby.jpg");
-		}else{
-		  draw_bitmap($Zz,10,587);
-		}
+		show_zz();
 		#让设备有时间画出来
 		sleep(1);
 		file_put_contents("/sys/android_power/state","standby");
@@ -57,11 +41,17 @@ while(true){
 	    //上电了,卸载U盘，挂载服务
 	    system("/bin/umount /mnt/udisk");
 	    system("/sbin/insmod /lib/g_file_storage.ko file=/dev/mtdblock5 stall=0 removable=1");
+	    if( file_exists(PIC_USB) ){
+	      system("/opt/bin/php /tmp/system/showjpg.php " . PIC_USB);
+	    }
 	  }else{
 	    //掉电了，挂载U盘
 	    system("rmmod g_file_storage.ko");
 	    system("umount /mnt/udisk");
 	    system("mount -t vfat -o iocharset=utf8 /dev/mtdblock5 /mnt/udisk");
+	    if( file_exists(PIC_LOGO) ){
+	      system("/opt/bin/php /tmp/system/showjpg.php " . PIC_LOGO);
+	    }
 	  }
 	  $last_usb = $fc;
 	}//if change	

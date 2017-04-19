@@ -136,6 +136,7 @@ function refresh(){
   if( REVERT_MODE ){
     $g_show_mode = "revert";
   }
+  #  周期刷白在此更改  前一个数要比的后一个数大
   if( $n%10!=9 || DEBUG){
     return;
   }
@@ -303,7 +304,7 @@ function readMenu($menuCount){
   $afn=[];
   while($item = readdir($dh) ){
     if( $item{0} == "."){
-    continue;
+      continue;
     }
     if( substr(strtolower($item),-3)!="txt" ){
       continue;
@@ -402,6 +403,8 @@ function menu_process( $page ){
   if ($page == "p") {//长按,打开书
     $file=readMenu($menuCount);
     if( strtolower($file) == "off.txt" ){
+      show_off();
+      sleep(1);
       system("/sbin/poweroff");
       die();
     }
