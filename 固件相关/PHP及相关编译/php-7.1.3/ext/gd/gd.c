@@ -2726,7 +2726,7 @@ PHP_FUNCTION(imagefile)
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
 		RETURN_FALSE;
 	}
-	unsigned short line[2048];
+	unsigned short line[1024],*pline;
     
 	int width = im->sx;
 	int height = im->sy;
@@ -2749,12 +2749,27 @@ PHP_FUNCTION(imagefile)
 	}
 	for (j = 0; j < height; ++j) {
 		pThisRow = *ptpixels++;
-		for (i = 0; i < width; ++i) {
+		pline = line;
+		for (i = 0; i < width; ++i,++pline) {
 			thisPixel = *pThisRow++;
+			/*
+			   00000000 RRRRRRRR GGGGGGGG BBBBBBBB
+			            11111000 11111100 11111000
+			                     RRRRRGGG GGGBBBBB
+			                     11111000
+			                     00000111 11100000
+			                     00000000 00011111
+			   (R & 0x00F80000) >> 8
+			   (G & 0x0000FC00) >> 5
+			   (B & 0x000000F8) >> 3
 			r = gdTrueColorGetRed (thisPixel);
 			g = gdTrueColorGetGreen (thisPixel);
 			b = gdTrueColorGetBlue (thisPixel);
 			line[i] = ((r >> 3) << 11) | ((g >> 2) << 6) | (b >>3);
+			*/
+			*pline = ((thisPixel >> 8) & 0xF800 ) | 
+			  	  ((thisPixel >> 5) & 0x07E0 ) |
+			  	  ((thisPixel >> 3) & 0x001F );
 		}
 		fwrite(line,width*2,1,fp);
 	}

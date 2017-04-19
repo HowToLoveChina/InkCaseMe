@@ -34,9 +34,10 @@ export LDFLAGS=" -L/home/tomac/src/install/lib "
 --enable-sysvmsg \
 --enable-sysvsem \
 --enable-sysvshm  \
---enable-zip 
+--enable-zip \
+--enable-json
 
-
+arm-none-linux-gnueabi-strip sapi/cli/php
 
 
 对 Gd Xpm创建函数的识别做了处理不让识别出来
@@ -46,7 +47,7 @@ expected declaration specifiers or '...' before 'FILE'
 
 在Makefile中将 dynamic 连接的字去掉
 
-pthread 需要使用 -pthread来替代  -lpthread
+pthread 需要使用 -pthread 来替代  -lpthread
 
 #zlib
 
