@@ -401,6 +401,10 @@ function menu_process( $page ){
   }
   if ($page == "p") {//长按,打开书
     $file=readMenu($menuCount);
+    if( $file == "off.txt" ){
+      system("/sbin/poweroff");
+      die();
+    }
     printf("selectd %s\n",$file);
     //保存文件名，不含路径
     save_book_selected($file);
