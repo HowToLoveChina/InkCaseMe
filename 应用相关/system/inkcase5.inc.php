@@ -214,6 +214,37 @@ function _menu_driver(string $app){
 }
 
 
-
-
-
+/*
+  外部函数，检查并切换应用
+*/
+function app_switch(string $app){
+  #应用目录必须存在
+  $appdir = sprintf("/mnt/udisk/%s",$app);
+  if( ! is_dir($appdir) ){
+    return false;
+  }
+  #应用主程序必须存在
+  $appprg = sprintf("/mnt/udisk/%s/%s.php",$app,$app);
+  if( ! file_exists($appprg) ){
+    return false;
+  }
+  file_put_contents("/mnt/udisk/app.txt",$app);
+  return true;
+}
+/*
+  外部函数，获得所有的想要使用的app
+*/
+function app_list(){
+  $apps = file( "/mnt/udisk/system/apps.txt");
+  $ret = [];
+  foreach( $apps as $app){
+    $app = trim($app);
+    #应用目录必须存在
+    $appdir = sprintf("/mnt/udisk/%s",$app);
+    if( is_dir($appdir) ){
+      $ret [] = $app;
+    }
+  
+  }
+  return $ret;
+}
