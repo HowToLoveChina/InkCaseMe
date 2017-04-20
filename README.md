@@ -7,20 +7,32 @@
 目前的功能有：
 
 1、电纸书应用 ebook  作者：索马里的海贼(QQ:3298302054)
-
+带
 2、图片浏览   jpg 
 
+主要刷机资料：
+1. (推荐下载) 图文刷机教程：https://wiztrader.ctfile.com/fs/FfC198007421 （感谢作者：天気雨 QQ:727999552）
+2. (推荐下载) DIY固件：最新二键刷机包 20170420 https://wiztrader.ctfile.com/fs/Co5199109369
+3. (过时)20170419 https://wiztrader.ctfile.com/fs/SAI199098409
+4. (过时) 修正双重启动等已知问题 20170410 https://wiztrader.ctfile.com/fs/PAs197383276
+5. (过时）Windows带usbtty功能  20170406 https://wiztrader.ctfile.com/fs/hrS196017989
+6. (过时）原版固件：https://wiztrader.ctfile.com/fs/dCd197387966
 
- (推荐下载) 图文刷机教程：https://wiztrader.ctfile.com/fs/FfC198007421 （感谢作者：天気雨 QQ:727999552）
- 
+更新历史:
+1. 2017.04.06 自制固件出炉
+2. 2017.04.07 开放usbtty功能
+3. 2017.04.10 电纸书功能可用
+4. 2017.04.12 天気雨制作刷机教程
+5. 2017.04.19 wushy增加菜单功能;解决图片显示异常;引入更新模式图片，待机图片，关机图片
+6. 2017.04.20 修正时序引起的待机图片异常
 
-（推荐下载）DIY固件：最新二键刷机包 20170419 https://wiztrader.ctfile.com/fs/SAI199098409
+使用中主要注意事项:
+1. 为防止脚本异常，所以固件在非usbtty模式下，默认直接挂载U盘功能，所以连接电脑时，！！一定！！按以下步骤才能正常更新
+   a.先插拔一次，让系统进入合理的更新模式
+   b.再次插入，这时脚本系统接管U盘，可正常更新
+   c.卸载U盘，拔出USB线
+   d.无需再重启，可直接进入使用状态
 
-(过时) 修正双重启动等已知问题 20170410 https://wiztrader.ctfile.com/fs/PAs197383276
-
-（过时）Windows带usbtty功能  20170406 https://wiztrader.ctfile.com/fs/hrS196017989
-
-（过时）原版固件：https://wiztrader.ctfile.com/fs/dCd197387966
 
 
 
