@@ -17,6 +17,10 @@ $last_usb = get_vbus_status() || get_usb_online() ;
 $app = file_get_contents("/mnt/udisk/app.txt");
 # 取得app是否使用串口
 $app_flag = file_exists(sprintf("/mnt/udisk/%s/usbserial.txt",$app));
+
+$last_vbus = get_vbus_status();
+$last_online = get_usb_online();
+
 while(true){
 	#睡一秒，让机器反应一下
 	sleep(1);
@@ -39,12 +43,24 @@ while(true){
 		#唤醒以后立即刷新一次应用,改成在key里接受按键事件来处理
 		continue;
 	}//if delta
-	$flag = $vbus || $online  ;
-	if( $last_usb == $flag ){
+	#没变化
+	if( $last_vbus == $vbus  && $online == $last_online ){
 	  continue;
 	}
-	#usb状态有变化
-	if( $fc > 0 ){
+
+	if( $vbus && ! $last_vbus ){
+	  #上电了
+	  mount_usb();
+	}
+	if( ! $online  && $last_online ){
+	  umount_usb();
+	}
+	$last_vbus = $vbus ;
+	$last_online = $online;
+}//while
+
+
+function mount_usb(){
 	  //必须先上图，否则就没文件了
 	  if( file_exists(PIC_USB) ){
 	    system("/opt/bin/php /tmp/system/showjpg.php " . PIC_USB);
@@ -54,7 +70,9 @@ while(true){
 	  system("/sbin/insmod /lib/g_file_storage.ko file=/dev/mtdblock5 stall=0 removable=1");
 	  //! 防止立即睡着
 	  update_stamp();
-	}else{
+}
+
+function umount_usb(){
 	  //掉电了，挂载U盘
 	  system("rmmod g_file_storage.ko");
 	  system("umount /mnt/udisk");
@@ -65,8 +83,7 @@ while(true){
 	  }
 	  //! 防止立即睡着
 	  update_stamp();
-	}
-}//while
+}
 
 #取得是否有电
 function get_vbus_status(){
