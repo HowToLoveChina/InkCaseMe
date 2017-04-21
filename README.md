@@ -11,7 +11,7 @@
 
 主要刷机资料：
 1. (推荐下载) 图文刷机教程：https://wiztrader.ctfile.com/fs/FfC198007421 （感谢作者：天気雨 QQ:727999552）
-2. (推荐下载) DIY固件：最新二键刷机包 20170420 https://wiztrader.ctfile.com/fs/SNY199110377
+2. (推荐下载) DIY固件：最新二键刷机包 https://wiztrader.ctfile.com/fs/sXq199116072
 3. (过时)20170419 https://wiztrader.ctfile.com/fs/SAI199098409
 4. (过时) 修正双重启动等已知问题 20170410 https://wiztrader.ctfile.com/fs/PAs197383276
 5. (过时）Windows带usbtty功能  20170406 https://wiztrader.ctfile.com/fs/hrS196017989
