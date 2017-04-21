@@ -7,6 +7,7 @@
   20170408 待机功能交给sleep脚本处理，不在这里处理
   20170415 增加菜单显示功能  author:wushy(qq:10249082)
   20170417 不同的书使用不同的进度
+  20170420 增加可配置功能
 */
 
 /*
@@ -17,17 +18,21 @@
 * bugfix：
 * 半角字符导致页面显示不整齐
 */
-
-define("DEBUG",0);
-define("PADDING", 10); //四周留空
+define("APP","ebook");
 define("APP_BASE",dirname(__FILE__) . "/" );
+if( ! defined('DEBUG') ){
+  define("DEBUG",0);
+}
+include(APP_BASE."/../system/inkcase5.inc.php");
+################################################################################
+# 以下可配置项，可在config.ini中修改，请尽量不要修改代码
+################################################################################
+define("PADDING", app_config(APP,"四周留空",10) ); //四周留空
+define("FONT",(DEBUG==0)?app_config(APP,"字体文件","/opt/qte/fonts/msyh.ttf"):"msyh.ttf");
+
 define("BOOK_SELECTED",'/mnt/udisk/ebook/current_book');
 define("MENU_COUNT",'/tmp/menu_count');
 define("MENU_STATUS",'/tmp/menu_status');
-if( DEBUG == 0 ){
-	define("FONT","/opt/qte/fonts/msyh.ttf");
-}
-include(APP_BASE."/../system/inkcase5.inc.php");
 #全局进度变量
 global $g_book_var; 
 #全局显示模式
@@ -91,7 +96,7 @@ function book_render($page){
 function welcome() {
     $bg    = imagecreatetruecolor(SCREEN_W, SCREEN_H);
     $white = imagecolorallocate($bg, 255, 255, 255);
-    $black = imagecolorAllocate($bg, 0, 0, 0);
+    $black = imagecolorallocate($bg, 0, 0, 0);
     imagefill($bg, 0, 0, $white);
     imagettftext($bg, 30, 0, 20, 80, $black, FONT, "inkcase i5 txt阅读器");//
     imagettftext($bg, 20, 0, 20, 120, $black, FONT, "使用说明:");//
@@ -137,7 +142,12 @@ function refresh(){
     $g_show_mode = "revert";
   }
   #  周期刷白在此更改  前一个数要比的后一个数大
-  if( $n%10!=9 || DEBUG){
+  $cycle = app_config(APP,"刷新周期",10);
+  if( $cycle == 0 ){
+    $cycle = 4 ;
+  }
+  printf("cycle=%d\n",$cycle);
+  if( $n %  $cycle != ($cycle-1) || DEBUG){
     return;
   }
   //! 定期刷黑
@@ -154,7 +164,7 @@ function refresh(){
   $white = imagecolorallocate($im, 255, 255, 255);
   imagefilledrectangle($im,0,0,SCREEN_W,SCREEN_H,$white);
   outFunc($im);
-  sleep(0.5);
+  sleep(app_config(APP,"刷白停留",0.5));
 }
 
 ################################################################################
@@ -323,13 +333,13 @@ function env_init(){
   //
   //刷新模式 sleep - 刷黑再刷白
   //        revert - 刷白再反显
-  define("REFRESH_MODE","revert");
-  define("REVERT_MODE",false);
+  define("REFRESH_MODE",app_config(APP,"刷新模式","revert") );
+  define("REVERT_MODE",app_config(APP,'反显模式',0)==1);
   //
-  define("FONT_SIZE",18);		//显示字体大小
-  define("SPAN", 27); 			//行间距
-  define("ROW", 21); 			//屏幕可以容纳总行数
-  define("COL", 14); 			//每行字数
+  define("FONT_SIZE",app_config(APP,“字体大小”,18) );		//显示字体大小
+  define("SPAN", app_config(APP,"行间距",27)); 			//行间距
+  define("ROW", app_config(APP,"行数",21)); 			//屏幕可以容纳总行数
+  define("COL", app_config(APP,"字数",14)); 			//每行字数
   #默认的书籍名称
   if( ! file_exists(BOOK_SELECTED) ){
     file_put_contents(BOOK_SELECTED,'book.txt');
@@ -345,9 +355,8 @@ function env_init(){
   define("BOOK_FILE", $fn );
   define("BOOK_VAR",sprintf("%s%s.var",APP_BASE,$current_book));
   define("REFRESH_COUNT",(DEBUG==0)?'/tmp/ebook_count':'ebook_count');
-  if(DEBUG == 0){
-  }else{
-    define("FONT","/opt/qte/fonts/msyh.ttf");
+  if(DEBUG != 0){
+    define("FONT","msyh.ttf");
     header ("Content-type: image/png");
     $argc = 2;
     $argv = array('','n');

@@ -1,7 +1,7 @@
 <?php
 mb_internal_encoding("UTF-8");
 
-
+if( ! defined('DEBUG' ) ){
 define("DEBUG",false);
 define("INKCASE_I5_DEV",true);
 define("POWER_STATE","/sys/android_power/state");
@@ -22,7 +22,7 @@ define("PIC_OFF","/tmp/system/resource/off.jpg");
 
 
 #USB连接图
-define("PIC_USB","/tmp/system/resource/standby.jpg");
+define("PIC_USB","/tmp/system/resource/usb.jpg");
 #开机图,断开USB图
 define("PIC_LOGO","/mnt/udisk/logo.jpg");
 
@@ -60,6 +60,21 @@ $Off = [
   "0000000101010000000",
   "0000000000000000000"
 ];
+$Usb = [ 
+  "0000000000000000000",
+  "0001000000000001000",
+  "0001000000000001000",
+  "0001000000000001000",
+  "0001000000000001000",
+  "0001000000000001000",
+  "0001000000000001000",
+  "0001000000000001000",
+  "0000100000000010000",
+  "0000010000000100000",
+  "0000001100011000000",
+  "0000000011100000000",
+  "0000000000000000000"
+];
 
 
 
@@ -76,11 +91,12 @@ if( DEBUG ){
 ###############################################################
 function show_zz(){
   global $Zz;
-  if( file_exists(PIC_STANDBY) ){
-    showjpg(PIC_STANDBY);
+
+  if( file_exists(PIC_STANDBY) && system_config("使用大模式图片",0) > 0 ){
+    showjpg(PIC_STANDBY , "当前为休眠模式");
     return;
   }
-  if( file_exists(PIC_ZZ) ){
+  if( file_exists(PIC_ZZ) && system_config("使用小模式图片",0) > 0 ){
     attachjpg(PIC_ZZ,10,578,19,13);
     return;
   }
@@ -91,15 +107,35 @@ function show_zz(){
 ###############################################################
 function show_off(){
   global $Off;
-  if( file_exists(PIC_POWEROFF) ){
-    showjpg(PIC_POWEROFF);
+  if( file_exists(PIC_POWEROFF) && system_config("使用大模式图片",0) > 0 ){
+    showjpg(PIC_POWEROFF,"当前为关机模式");
     return;
   }
-  if( file_exists(PIC_OFF) ){
+  if( file_exists(PIC_OFF) && system_config("使用小模式图片",0) > 0){
     attachjpg(PIC_OFF,10,578,19,13);
     return;
   }
   draw_bitmap($Off,10,587);
+}
+
+function show_usb(){
+  global $Usb;
+  if( file_exists(PIC_USB) && system_config("使用大模式图片",0) > 0 ){
+    showjpg(PIC_USB,"当前为USB模式");
+    return;
+  }
+  if( file_exists(PIC_OFF) && system_config("使用小模式图片",0) > 0){
+    attachjpg(PIC_OFF,10,578,19,13);
+    return;
+  }
+  draw_bitmap($Off,10,587);
+}
+
+function show_work(){
+  if( file_exists(PIC_LOGO) && system_config("使用大模式图片",0) > 0 ){
+    showjpg(PIC_LOGO,"当前为工作模式");
+    return;
+  }
 }
 
 ###############################################################
@@ -137,28 +173,31 @@ function attachjpg(string $file,int $x,int $y,int $w,int $h){
 ###############################################################
 #拉伸到满屏显示
 ###############################################################
-function showjpg($file){
-    $maxwidth=360;
-    $maxheight=600;
+function showjpg($file,$txt=""){
 
     $im = imagecreatefromjpeg($file);
-    $newim = imagecreatetruecolor(360,600);
+    $newim = imagecreatetruecolor(SCREEN_W,SCREEN_H);
     if( $im === false ){
     	die("open jpg error");
     }
     $pic_width = imagesx($im);
     $pic_height = imagesy($im);
-    if(($maxwidth && $pic_width > $maxwidth) || ($maxheight && $pic_height > $maxheight)){
+    if(($pic_width > SCREEN_W) || ($pic_height > SCREEN_H)){
         if(function_exists("imagecopyresampled")){
-           imagecopyresampled($newim,$im,0,0,0,0,$maxwidth,$maxheight,$pic_width,$pic_height);
+           imagecopyresampled($newim,$im,0,0,0,0,SCREEN_W,SCREEN_H,$pic_width,$pic_height);
         }else{
-           imagecopyresized($newim,$im,0,0,0,0,$maxwidth,$maxheight,$pic_width,$pic_height);
+           imagecopyresized($newim,$im,0,0,0,0,SCREEN_W,SCREEN_H,$pic_width,$pic_height);
         }
-        imagefile($newim,"/dev/fb",1);
     }else{
-        imagecopyresized($newim,$im,0,0,0,0,$pic_width,$pic_height,$pic_width,$pic_height);
-        imagefile($newim,"/dev/fb",1);
+        imagecopyresized($newim,$im,0,0,0,0,SCREEN_W,SCREEN_H,$pic_width,$pic_height);
     }           
+    if( $txt != "" && system_config("模式画面叠加字符",1) > 0 ){
+      $co = imagecolorallocate($newim, 255, 255, 255);
+      imagefilledrectangle($newim,0,570,SCREEN_W,SCREEN_H,$co);
+      $co = imagecolorallocate($newim, 0, 0, 0);
+      imagettftext($newim,16,0,20,SCREEN_H-10,$co,DEFAULT_FONTFILE,$txt);
+    }
+    imagefile($newim,"/dev/fb",1);
     imagedestroy($newim);
     imagedestroy($im);
 }
@@ -170,7 +209,7 @@ function draw_bitmap($ar,$x,$y){
   $fp =fopen("/dev/fb","wb+");  
   $lines = count($ar);          
   for($i = 0 ; $i < $lines ; $i++){
-    fseek( $fp , (($i+$y)*360+$x)*2 , 0 );
+    fseek( $fp , (($i+$y)*SCREEN_W+$x)*2 , 0 );
     $str = build_line($ar[$i]);           
     fwrite($fp,$str);                     
   }                                       
@@ -364,3 +403,45 @@ function app_list(){
   }
   return $ret;
 }
+
+/*
+  读取系统的配置
+*/
+function system_config(string $config,string $default = ""){
+  static $cfg = false;
+  if( $cfg == false ){
+    foreach( file("/tmp/system/config.ini") as $line ){
+      list($name,$value)=explode("=",$line);
+      if( $name != "" && $value != ""){
+	$cfg[$name]=trim($value);
+      }//if
+    }//foreach
+  }
+  if( array_key_exists($config,$cfg) ){
+    return $cfg[$config];
+  }
+  return $default;
+}
+/*
+  读取应用的配置
+*/
+function app_config( $app , string $config,string $default = ""){
+  static $cfg = [];
+  if( !array_key_exists($app,$cfg) ){
+    $xcfg = [];
+    foreach( file(sprintf("/mnt/udisk/%s/config.ini",$app) ) as $line ){
+      list($name,$value)=explode("=",$line);
+      if( $name != "" && $value != ""){
+	$xcfg[$name]=trim($value);
+      }//if
+    }//foreach
+    $cfg[$app] = $xcfg;
+  }
+  $apps = $cfg[$app];
+  if( array_key_exists($config,$apps) ){
+    return $apps[$config];
+  }
+  return $default;
+}
+
+

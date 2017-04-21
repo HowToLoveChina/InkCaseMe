@@ -15,6 +15,12 @@ include(APP_BASE."/../system/inkcase5.inc.php");
 $page   = isset($argv[1]) ? $argv[1] : "n";
 $Offset = 0;
 
+if ($page == "d") {//双击
+  show_off();
+  sleep(1);
+  system("/sbin/poweroff");
+  die();
+}
 
 
 $dh = opendir(APP_BASE);
@@ -42,20 +48,11 @@ function get_next_file(array $afn ){
     file_put_contents( IDX_FILE , "-1");	
   }
   $fn = intval(file_get_contents(IDX_FILE)) ;
-  if ($page == "n") {
-    $fn++;
-  } else {
-    $fn--;
-    if( $fn < 0 ){
-      $fn=0;
-    }
-  }
+  $fn++;
   $fn %= sizeof($afn);
   file_put_contents( IDX_FILE , $fn );
-  var_dump($afn);
   return $afn[$fn];
 }
 $jpg = $afn[$fn];
-
 
 

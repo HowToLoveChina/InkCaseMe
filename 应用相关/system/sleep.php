@@ -62,9 +62,7 @@ while(true){
 
 function mount_usb(){
 	  //必须先上图，否则就没文件了
-	  if( file_exists(PIC_USB) ){
-	    system("/opt/bin/php /tmp/system/showjpg.php " . PIC_USB);
-	  }
+	  show_usb();
 	  //上电了,卸载U盘，挂载服务
 	  system("/bin/umount /mnt/udisk");
 	  system("/sbin/insmod /lib/g_file_storage.ko file=/dev/mtdblock5 stall=0 removable=1");
@@ -78,9 +76,7 @@ function umount_usb(){
 	  system("umount /mnt/udisk");
 	  system("mount -t vfat -o iocharset=utf8 /dev/mtdblock5 /mnt/udisk");
 	  //只能后刷图，否则也看不到
-	  if( file_exists(PIC_LOGO) ){
-	    system("/opt/bin/php /tmp/system/showjpg.php " . PIC_LOGO);
-	  }
+	  show_work();
 	  //! 防止立即睡着
 	  update_stamp();
 }
