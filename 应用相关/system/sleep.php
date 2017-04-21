@@ -51,7 +51,10 @@ while(true){
 	if( ($vbus && ! $last_vbus) && ! $online  ){
 	  #上电了
 	  mount_usb();
-	}
+	}else
+	if( $last_vbus == true && $vbus == false ){
+	  umount_usb();
+	}else
 	if( ! $online  && $last_online ){
 	  umount_usb();
 	}
