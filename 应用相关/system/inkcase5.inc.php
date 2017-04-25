@@ -2,7 +2,8 @@
 mb_internal_encoding("UTF-8");
 
 if( ! defined('DEBUG' ) ){
-define("DEBUG",false);
+	define("DEBUG",false);
+} //error fix
 define("INKCASE_I5_DEV",true);
 define("POWER_STATE","/sys/android_power/state");
 define("SCREEN_W", 360);
