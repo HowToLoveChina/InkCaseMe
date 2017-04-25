@@ -194,7 +194,8 @@ function getPage($offset) {
     $width    = 0;
     $lastword = '';
     $line     = 0;
-    while (1) {
+	$len = mb_strlen($string);
+    while ($i<$len) {
         $word = mb_substr($string, $i, 1);
         $i++;
         $sline .= $word;
