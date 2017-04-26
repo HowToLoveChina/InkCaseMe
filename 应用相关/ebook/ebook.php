@@ -8,6 +8,7 @@
   20170415 增加菜单显示功能  author:wushy(qq:10249082)
   20170417 不同的书使用不同的进度
   20170420 增加可配置功能
+  20170426 GBK支持 
  */
 
 /*
@@ -58,12 +59,10 @@ book_render($page);
 book_split();
 # 全局处理到此结束
 die();
-function book_split(){
-    global $g_book_var;
-    
-    
-}
 
+function book_split() {
+    global $g_book_var;
+}
 
 ################################################################################
 # 生成阅读记录，提供返回记录
@@ -203,6 +202,14 @@ function getPage($offset) {
     fseek($fp, $offset);
     $string = fread($fp, 2048);
     fclose($fp);
+    
+    if( $g_book_var['encoding'] != 'UTF-8' ){
+        echo "before iconv";
+        $string = mb_convert_encoding($string,"UTF-8",$g_book_var['encoding']);
+        echo "done.\n";
+
+    }
+    
     $i = 0;
     $w_config = checkFont();
     $sline = '';
@@ -210,6 +217,8 @@ function getPage($offset) {
     $lastword = '';
     $line = 0;
     $len = mb_strlen($string);
+    
+    
     while ($i < $len) {
         $word = mb_substr($string, $i, 1);
         $i++;
@@ -243,7 +252,13 @@ function getPage($offset) {
         if ($word == "\n") {
             imagettftext($bg, FONT_SIZE, 0, PADDING, 30 + $line * SPAN, $black, FONT, $sline);
             $line++;
-            $offset += strlen($sline);
+            #还原成gbk再计算
+            if( $g_book_var['encoding'] != 'UTF-8' ){
+                $gbline = mb_convert_encoding($sline,$g_book_var['encoding'],"UTF-8");
+                $offset += strlen($gbline);
+            }else{
+                $offset += strlen($sline);
+            }
             $sline = '';
             if (($line + 1) * SPAN + 30 > SCREEN_H) {
                 break;
@@ -357,7 +372,7 @@ function env_init() {
     define("REFRESH_MODE", app_config(APP, "刷新模式", "revert"));
     define("REVERT_MODE", app_config(APP, '反显模式', 0) == 1);
     //
-    define("FONT_SIZE", app_config(APP,'字体大小',18));  //显示字体大小
+    define("FONT_SIZE", app_config(APP, '字体大小', 18));  //显示字体大小
     define("SPAN", app_config(APP, "行间距", 27));    //行间距
     define("ROW", app_config(APP, "行数", 21));    //屏幕可以容纳总行数
     define("COL", app_config(APP, "字数", 14));    //每行字数
@@ -410,6 +425,17 @@ function book_var_init() {
         file_put_contents(BOOK_VAR, serialize($var));
     }
     $g_book_var = unserialize(file_get_contents(BOOK_VAR));
+    if( !array_key_exists('encoding', $g_book_var) ){
+        $g_book_var['encoding'] = 'unknown';
+    }
+    var_dump($g_book_var);
+    if( $g_book_var['encoding'] == 'unknown'){
+        $fp = fopen(BOOK_FILE,"rb");
+        $s = fread($fp,2048);
+        $encoding = mb_detect_encoding($string, 'CP936,GB18030,UTF-8');
+        var_dump($encoding);
+        $g_book_var['encoding'] = $encoding;
+    }
 }
 
 ################################################################################
@@ -497,3 +523,4 @@ function checkFont() {
     }
     return unserialize(file_get_contents(APP_BASE . basename(FONT, ".ttf") . "-" . FONT_SIZE . ".fconf"));
 }
+
