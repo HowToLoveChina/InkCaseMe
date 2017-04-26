@@ -183,8 +183,121 @@ function refresh() {
 ################################################################################
 # 读取合适长度的一页并显示
 ################################################################################
+function get_colors($bg){
+    global $g_show_mode;
+    //! 决定如何显示，正常还是反白
+    if ($g_show_mode == "normal") {
+        echo "normal mode \n";
+        $white = imagecolorallocate($bg, 255, 255, 255);
+        $black = imagecolorAllocate($bg, 0, 0, 0);
+    } else {
+        $black = imagecolorallocate($bg, 255, 255, 255);
+        $white = imagecolorAllocate($bg, 0, 0, 0);
+    }
+    return [ $white,$black ];
+}
+
+function read_line($fp,$string){
+  global $g_book_var;
+  if( $string == "" ){
+    $string = fgets($fp);
+    if( $string === false ){
+      return [false,0];
+    }
+    if( $g_book_var['encoding'] != 'UTF-8' ){
+      $string = mb_convert_encoding($string,"UTF-8",$g_book_var['encoding']);
+    }
+  }
+  return [$string ,strlen($string)];
+}
+
+function get_screen_line($string){
+  #假设全是中文，那么读ROW个字
+  $col = COL;
+  $width = 0 ;
+  $len = mb_strlen($string);
+  for( $width=0; ($width + PADDING * 2) < SCREEN_W && $col < $len ; $col++){
+    $sline = mb_substr($string,0,$col);		
+    $r = imagettfbbox(FONT_SIZE,0,FONT,$sline);
+    $width = $r[4]-$r[0];
+  }
+    $col --;
+  if( $col < $len ){
+    $col --;
+    $sline = mb_substr($string,0,$col);
+  }
+  return [$sline,$col];
+}
 
 function getPage($offset) {
+    global $g_book_var;
+    $bg = imagecreatetruecolor(SCREEN_W, SCREEN_H);
+    list($white,$black) = get_colors($bg);
+    #画背景
+    imagefill($bg, 0, 0, $white);
+    #文本方式打开
+    $fp = fopen(BOOK_FILE, "rt");
+    #移动到页初
+    fseek($fp, $offset);
+    for($string = "" , $line = 0 ; $line < ROW ; $line ++ ){
+      list($string,$len) = read_line($fp,$string);
+      #文件终了
+      if( $len == 0  ){
+	break;
+      }//if
+      list( $sline , $col ) = get_screen_line( $string ); 
+      $text[$line]=$sline;
+      #行结束，直接读偏移
+      if( $col >= $len ){
+	$offset = ftell($fp);
+	$string = "";
+      }else{
+	#行中间，计算实际偏移
+	if( $g_book_var['encoding'] != 'UTF-8' ){
+	  $gbline = mb_convert_encoding($sline,$g_book_var['encoding'],"UTF-8");
+	  $offset += strlen($gbline);
+	}else{
+	  $offset += strlen($sline);
+	}//if utf8
+	$string = mb_substr($string,$col);
+      }//if 
+    }//for
+    fclose($fp);
+    var_dump($offset);
+    #画出来
+    for( $i = 0 ; $i < ROW ; $i ++ ){
+      imagettftext($bg, FONT_SIZE, 0, PADDING, 30 + $i* SPAN, 
+      	$black, FONT, $text[$i]);
+    }
+    /*
+     * 电池电量
+     */
+    if (DEBUG) {
+        $fc = "86";
+    } else {
+        $fc = file_get_contents("/sys/class/power_supply/battery/capacity");
+    }
+
+    $txt = sprintf("%d%%", $fc);
+    imagettftext($bg, 13, 0, 295, 598, $black, FONT, $txt);
+    imagerectangle($bg, 330, 585, 358, 598, $black);
+    $dx = 330 + (358 - 330) * intval($fc) / 100;
+    imagefilledrectangle($bg, 330, 585, $dx, 598, $black);
+
+    $rate = sprintf("%5.2f%%", $offset * 100 / $g_book_var['size']);
+    imagettftext($bg, 13, 0, 10, 598, $black, FONT, $rate);
+
+    imagettftext($bg, 13, 0, 70, 598, $black, FONT, BOOK_NAME); //显示图书名
+
+    outFunc($bg, "/dev/fb", 1);
+    imagedestroy($bg);
+    return $offset;
+}
+
+
+
+
+function getPage2($offset) {
     global $g_book_var;
     global $g_show_mode;
     $bg = imagecreatetruecolor(SCREEN_W, SCREEN_H);
@@ -433,13 +546,17 @@ function book_var_init() {
     if( !array_key_exists('encoding', $g_book_var) ){
         $g_book_var['encoding'] = 'unknown';
     }
-    var_dump($g_book_var);
     if( $g_book_var['encoding'] == 'unknown'){
+      if( strtolower(substr(BOOK_FILE,0,2)) == 'gb' ){
+	#对声明是gb的进行检测
         $fp = fopen(BOOK_FILE,"rb");
         $s = fread($fp,2048);
         $encoding = mb_detect_encoding($string, 'CP936,GB18030,UTF-8');
         var_dump($encoding);
         $g_book_var['encoding'] = $encoding;
+      }else{
+        $g_book_var['encoding'] = "UTF-8";
+      }
     }
 }
 
