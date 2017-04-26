@@ -15,6 +15,11 @@ if [ -e /mnt/udisk/logo.jpg ];then
    /opt/bin/php /tmp/system/showjpg.php /mnt/udisk/logo.jpg
 fi
 
+#生成缓存文件
+dd if=/dev/zero of=/tmp/ufb bs=720 count=600
+
+
+
 #将可执行程序复制到/tmp下，防止无法卸载问题
 chmod +x /tmp/system/button
 
