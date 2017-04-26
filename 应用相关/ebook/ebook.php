@@ -8,7 +8,7 @@
   20170415 增加菜单显示功能  author:wushy(qq:10249082)
   20170417 不同的书使用不同的进度
   20170420 增加可配置功能
-  20170426 GBK支持 
+  20170426 GBK支持,修正连续英文显示的问题，混合填充取为-1 
  */
 
 /*
@@ -221,13 +221,46 @@ function get_screen_line($string){
     $r = imagettfbbox(FONT_SIZE,0,FONT,$sline);
     $width = $r[4]-$r[0];
   }
-    $col --;
+  $col --;
   if( $col < $len ){
     $col --;
     $sline = mb_substr($string,0,$col);
   }
   return [$sline,$col];
 }
+
+
+function get_screen_line_fast($string){
+  static $w_config = false;
+  if( $w_config === false ){
+      $w_config = checkFont();
+  }
+  $len = mb_strlen($string);
+  $t = '';
+  #不是所有的字母间的pad都相同，所以这里取折中的数值
+  $pad = [ 
+    'enen' => -1 /*$w_config['en_pad']*/,
+    'encn' => $w_config['hybid_pad'],
+    'cnen' => $w_config['hybid_pad'],
+    'cncn' => $w_config['cn_pad'],
+  ];
+  for($prev='en',$col=0,$width=0;
+      ($width + PADDING * 2) < SCREEN_W && $col < $len;
+      $col++,$prev=$t){
+    $ch = mb_substr($string,$col,1);
+    $asc = ord($ch{0});
+    $t = ($asc>127) ? "cn":"en";
+    $w = ($asc>127) ? $w_config['cn_width'] : $w_config['en_width'][$asc];
+    $idx = $prev.$t;
+    $width += $w + $pad[$idx];
+  }
+  if( $col < $len ){
+    $col --;
+    $sline = mb_substr($string,0,$col);
+  }
+  return [$sline,$col];
+}
+
 
 function getPage($offset) {
     global $g_book_var;
@@ -245,7 +278,7 @@ function getPage($offset) {
       if( $len == 0  ){
 	break;
       }//if
-      list( $sline , $col ) = get_screen_line( $string ); 
+      list( $sline , $col ) = get_screen_line_fast( $string ); 
       $text[$line]=$sline;
       #行结束，直接读偏移
       if( $col >= $len ){
@@ -639,7 +672,7 @@ function checkFont() {
             'cn_height' => $size_cn_h,
             'en_width' => $size_en_array,
             'cn_pad' => $size_cn_pad,
-            'en_pad' => $size_en_pad,
+            'en_pad' => -1 /*$size_en_pad*/,
             'hybid_pad' => $size_hybid_pad
         )));
     }
