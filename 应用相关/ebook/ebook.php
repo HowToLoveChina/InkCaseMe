@@ -120,7 +120,7 @@ function welcome() {
     imagettftext($bg, 20, 0, 20, 330, $black, FONT, "关于:");
     imagettftext($bg, 18, 0, 30, 380, $black, FONT, "开发:");
     imagettftext($bg, 18, 0, 30, 410, $black, FONT, "     索马里的海贼(QQ:3298302054)");
-    imagettftext($bg, 18, 0, 30, 430, $black, FONT, "     wuhy(QQ:10249082)");
+    imagettftext($bg, 18, 0, 30, 440, $black, FONT, "     wuhy(QQ:10249082)");
     //   
     imagettftext($bg, 35, 0, 35, 480, $black, FONT, "按键开始阅读");
     imagettftext($bg, 15, 0, 55, 520, $black, FONT, "单击(下一页) 长按(上一页) 双击 (菜单)");
@@ -270,7 +270,12 @@ function getPage($offset) {
             $i--; //bugfix:上一行丢结尾一个字
             imagettftext($bg, FONT_SIZE, 0, PADDING, 30 + $line * SPAN, $black, FONT, $sline);
             $line++;
-            $offset += strlen($sline);
+            if( $g_book_var['encoding'] != 'UTF-8' ){
+                $gbline = mb_convert_encoding($sline,$g_book_var['encoding'],"UTF-8");
+                $offset += strlen($gbline);
+            }else{
+                $offset += strlen($sline);
+            }
             $sline = '';
             if (($line + 1) * SPAN + 30 > SCREEN_H) {
                 break;

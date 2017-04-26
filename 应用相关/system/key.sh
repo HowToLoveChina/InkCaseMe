@@ -9,8 +9,16 @@ date +%s > /tmp/keystamp
 if [ ! -e /mnt/udisk/app.txt ]; then
   exit;
 fi 
+
 #取得当前的应用
 app=`cat /mnt/udisk/app.txt`
+
+#充电模式下按键就进入应用模式
+if [ ! -e /mnt/udisk/${app}/${app}.php ]; then
+  umount_usb
+fi 
+
+
 #根据不同的应用分发给程序
 if [ x$1 == x28 ]; then
 	#单击
