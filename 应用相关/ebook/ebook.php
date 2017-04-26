@@ -245,7 +245,7 @@ function get_screen_line_fast($string){
     'cncn' => $w_config['cn_pad'],
   ];
   for($prev='en',$col=0,$width=0;
-      ($width + PADDING * 2) < SCREEN_W && $col < $len;
+      ($width + PADDING * 2) < SCREEN_W && $col <= $len;
       $col++,$prev=$t){
     $ch = mb_substr($string,$col,1);
     $asc = ord($ch{0});
