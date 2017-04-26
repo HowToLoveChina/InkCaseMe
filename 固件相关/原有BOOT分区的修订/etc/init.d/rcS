@@ -48,6 +48,9 @@ echo "Starting udevd..."
 #              0x0001c000(user)
 
 
+#生成外部显示缓冲区
+dd if=/dev/zero of=/tmp/ufb bs=720 count=600
+
 # 如果没有这个文件那么通过磁盘共享来刷system和user
 if [ ! -f /opt/installed ]; then 
   umount /opt
@@ -60,7 +63,7 @@ else
 	#gettty @ inittab 
   	#/sbin/getty /dev/ttygserial -L 115200 vt100 & 
   else
-    insmod /lib/g_file_storage.ko file=/dev/mtdblock5 stall=0 removable=1
+    insmod /lib/g_file_storage.ko luns=2 file=/dev/mtdblock5,/tmp/ufb stall=0 removable=1
   fi
 fi 
 

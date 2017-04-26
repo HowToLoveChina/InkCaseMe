@@ -20,8 +20,14 @@ $app_flag = file_exists(sprintf("/mnt/udisk/%s/usbserial.txt",$app));
 
 $last_vbus = get_vbus_status();
 $last_online = get_usb_online();
+$ufb = file_exists("/mnt/udisk/filefb");
+
 
 while(true){
+	#启用了filefb功能，并且USB存储上线了，那么每秒刷新屏幕
+	if( $ufb &&  $online ){
+	  system("dd if=/tmp/ufb of=/dev/fb bs=432000 2>/dev/null");
+	}
 	#睡一秒，让机器反应一下
 	sleep(1);
 	$delta = time()-file_get_contents("/tmp/keystamp");
