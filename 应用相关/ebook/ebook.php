@@ -357,7 +357,7 @@ function env_init() {
     define("REFRESH_MODE", app_config(APP, "刷新模式", "revert"));
     define("REVERT_MODE", app_config(APP, '反显模式', 0) == 1);
     //
-    define("FONT_SIZE", app_config(APP, “字体大小 ”,18));  //显示字体大小
+    define("FONT_SIZE", app_config(APP,'字体大小',18));  //显示字体大小
     define("SPAN", app_config(APP, "行间距", 27));    //行间距
     define("ROW", app_config(APP, "行数", 21));    //屏幕可以容纳总行数
     define("COL", app_config(APP, "字数", 14));    //每行字数
